@@ -1,6 +1,5 @@
 from django import forms
 from django.contrib import admin
-from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.core.exceptions import ValidationError
@@ -34,18 +33,23 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ["email", "username", "first_name", "last_name", "password", "date_of_birth", "is_active"]
+        fields = [
+            "email", "username", "first_name", "last_name", "password", 
+            "date_of_birth", "gender", "phone", "is_staff", "is_superuser",
+            "is_active", "is_subscribed"
+        ]
 
 class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
 
     list_display = [
-        'email', 'username', 'first_name', 'last_name', 'date_of_birth', 'is_active', 'date_joined']
-    list_filter = ['email', 'is_active']
+        'email', 'username', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined']
+    list_filter = ['is_active', 'is_staff', 'gender', 'is_subscribed']
     fieldsets = [
         (None, {"fields": ["email", "username", "first_name", "last_name", "password"]}),
         ("Información Personal", {"fields": ["date_of_birth", "gender", "phone"]}),
+        ("Permisos", {"fields": ["is_staff", "is_superuser", "is_active", "is_subscribed"]}),
     ]
     # add_fieldsets no es un atributo estándar de ModelAdmin. UserAdmin
     # anula get_fieldsets para usar este atributo cuando se crea un usuario.
@@ -55,16 +59,22 @@ class UserAdmin(BaseUserAdmin):
             {
                 "classes": ["wide"],
                 "fields": [
-                    "first_name", "last_name", "email", "username", 
-                    "password1", "password2", "date_of_birth", "is_active",
-                    "is_superuser"
+                    "email", "username", "first_name", "last_name",
+                    "password1", "password2", "date_of_birth", "phone", "gender",
                 ],
             },
+        ),
+        (
+            'Opciones avanzadas', 
+            {
+                "classes": ["collapse"],
+                "fields": [
+                    "is_staff", "is_superuser", "is_subscribed",
+                ],
+            }
         ),
     ]
     ordering = ['-date_joined']
     filter_horizontal = []
 
-# Register your models here.
 admin.site.register(User, UserAdmin)
-admin.site.unregister(Group)

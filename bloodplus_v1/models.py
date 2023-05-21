@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
 
 class UserManager(BaseUserManager):
@@ -32,7 +32,7 @@ class UserManager(BaseUserManager):
         return self.create_user(email, username, first_name, last_name, password, **other_fields)
     
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, PermissionsMixin):
     GENDER_TYPES = (('H', 'Hombre'), ('M', 'Mujer'), ('I', 'Indefinido'))
     email = models.EmailField(_('correo electrónico'), unique=True)
     username = models.CharField(max_length=150, unique=True)
@@ -63,12 +63,3 @@ class User(AbstractBaseUser):
     def __str__(self):
         return self.username
     
-    def has_perm(self, perm, obj=None):
-        return True
-    
-    def has_module_perms(self, app_label):
-        return True
-    
-    @property
-    def is_staff(self):
-        return self.is_superuser
