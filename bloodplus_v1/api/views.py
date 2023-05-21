@@ -21,7 +21,7 @@ def register(request):
             user = User.objects.create(
                 first_name=data['first_name'],
                 last_name=data['last_name'],
-                username=data['email'],
+                username=data['username'],
                 email=data['email'],
                 password=make_password(data['password']),
             )
@@ -48,7 +48,7 @@ def currentUser(request):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def updateUser(request):
-    user = request.userhyrt
+    user = request.user
 
     serializer = UserSerializer(user, many=False)
 
@@ -56,7 +56,7 @@ def updateUser(request):
 
     user.first_name = data['first_name']
     user.last_name = data['last_name']
-    user.username = data['email']
+    user.username = data['username']
     user.email = data['email']
 
     if data['password'] != '':

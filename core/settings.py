@@ -175,3 +175,5 @@ VIRTUAL_ENV_BASE = os.environ.get('VIRTUAL_ENV')
 
 GEOS_LIBRARY_PATH = VIRTUAL_ENV_BASE + '/Lib/site-packages/osgeo/geos_c.dll'
 GDAL_LIBRARY_PATH = VIRTUAL_ENV_BASE + '/Lib/site-packages/osgeo/gdal304.dll'
+
+AUTH_USER_MODEL = 'bloodplus_v1.User'
