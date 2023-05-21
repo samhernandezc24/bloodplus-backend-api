@@ -3,17 +3,15 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from django.contrib.auth.hashers import make_password
-from .serializers import SignUpSerializer, UserSerializer
+from .serializers import SignUpSerializer
 
 from rest_framework.permissions import IsAuthenticated
 
-from django.contrib.auth.models import User
-
+from bloodplus_v1.models import User
 
 @api_view(['POST'])
 def register(request):
     data = request.data
-
     user = SignUpSerializer(data=data)
 
     if user.is_valid():
@@ -35,10 +33,10 @@ def register(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
     else:
-        return Response(user.errors)
+        return Response(user.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET'])
+""" @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def currentUser(request):
     user = UserSerializer(request.user)
@@ -63,4 +61,4 @@ def updateUser(request):
         user.password = make_password(data['password'])
 
     user.save()
-    return Response(serializer.data)
+    return Response(serializer.data) """

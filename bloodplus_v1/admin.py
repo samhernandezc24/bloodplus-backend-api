@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.core.exceptions import ValidationError
 
-from .models import User
+from .models import User, BloodType
 
 class UserCreationForm(forms.ModelForm):
     password1 = forms.CharField(label="Contraseña", widget=forms.PasswordInput)
@@ -45,11 +45,11 @@ class UserAdmin(BaseUserAdmin):
 
     list_display = [
         'email', 'username', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined']
-    list_filter = ['is_active', 'is_staff', 'gender', 'is_subscribed']
+    list_filter = ['is_active', 'is_staff', 'gender', 'is_subscribed', 'blood', 'role']
     fieldsets = [
         (None, {"fields": ["email", "username", "first_name", "last_name", "password"]}),
-        ("Información Personal", {"fields": ["date_of_birth", "gender", "phone"]}),
-        ("Permisos", {"fields": ["is_staff", "is_superuser", "is_active", "is_subscribed"]}),
+        ("Información Personal", {"fields": ["date_of_birth", "gender", "phone", "blood"]}),
+        ("Permisos", {"fields": ["role", "is_staff", "is_superuser", "is_active", "is_subscribed"]}),
     ]
     # add_fieldsets no es un atributo estándar de ModelAdmin. UserAdmin
     # anula get_fieldsets para usar este atributo cuando se crea un usuario.
@@ -61,7 +61,7 @@ class UserAdmin(BaseUserAdmin):
                 "fields": [
                     "email", "username", "first_name", "last_name",
                     "password1", "password2", "date_of_birth", "phone", "gender",
-                ],
+                    "blood"],
             },
         ),
         (
@@ -69,8 +69,7 @@ class UserAdmin(BaseUserAdmin):
             {
                 "classes": ["collapse"],
                 "fields": [
-                    "is_staff", "is_superuser", "is_subscribed",
-                ],
+                   "role", "is_staff", "is_superuser", "is_subscribed"],
             }
         ),
     ]
@@ -78,3 +77,4 @@ class UserAdmin(BaseUserAdmin):
     filter_horizontal = []
 
 admin.site.register(User, UserAdmin)
+admin.site.register(BloodType)

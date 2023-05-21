@@ -31,8 +31,23 @@ class UserManager(BaseUserManager):
                 'El superusuario debe ser asignado a es is_superuser=True')
         return self.create_user(email, username, first_name, last_name, password, **other_fields)
     
+class BloodType(models.Model):
+    blood_type = models.CharField(max_length=10, blank=True)
+    description = models.TextField(_('descripción'), blank=True)
+    date_updated = models.DateTimeField(auto_now=True, blank=True, null=True)
 
+    class Meta:
+        db_table = 'blood_types'
+
+    def __str__(self):
+        return self.blood_type
+    
 class User(AbstractBaseUser, PermissionsMixin):
+    class Role(models.TextChoices):
+        ADMIN = "ADMIN", "Admin"
+        DONOR = "DONADOR", "Donador"
+        REQUESTER = "SOLICITADOR", "Solicitador"
+
     GENDER_TYPES = (('H', 'Hombre'), ('M', 'Mujer'), ('I', 'Indefinido'))
     email = models.EmailField(_('correo electrónico'), unique=True)
     username = models.CharField(max_length=150, unique=True)
@@ -40,6 +55,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=150, blank=True)    
     phone = models.CharField(max_length=15, blank=True)
     gender = models.CharField(max_length=1, choices=GENDER_TYPES, default='I')
+    role = models.CharField(max_length=50, choices=Role.choices, default=Role.ADMIN)
+    blood = models.ForeignKey(BloodType, on_delete=models.SET_NULL, null=True)
     date_of_birth = models.DateField(default='2023-02-02')
     average_rating = models.DecimalField(
         max_digits=2, decimal_places=1, default=0)
