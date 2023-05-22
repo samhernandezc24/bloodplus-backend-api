@@ -1,23 +1,26 @@
 from rest_framework.views import exception_handler
 
+
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
     exception_class = exc.__class__.__name__
-    
-    if exception_class == 'AuthenticationFailed':
+
+    ERROR_MESSAGES = {
+        'AuthenticationFailed': 'El email o la contraseña son inválidos. Verifica que los datos ingresados sean correctos.',
+        'NotAuthenticated': 'Ingresa al sistema para poder acceder a este recurso. Asegúrate de iniciar sesión antes de intentar acceder a esta ruta.',
+        'InvalidToken': 'La autenticación con este token ha expirado. Por favor, accede nuevamente para obtener un nuevo token de autenticación.',
+    }
+
+    GENERIC_ERROR_MESSAGE = 'Ocurrió un error inesperado. Por favor, inténtalo más tarde.'
+
+    if exception_class in ERROR_MESSAGES:
         response.data = {
-            'error': 'El email o la contraseña son inválidos'
+            'error': ERROR_MESSAGES[exception_class].strip()
         }
-
-    if exception_class == 'NotAuthenticated':
+    else:
         response.data = {
-            'error': 'Ingresa al sistema para poder acceder a este recurso'
-        } 
-
-    if exception_class == 'InvalidToken':
-        response.data = {
-            'error': 'La autenticación del token ha expirado. Por favor accede de nuevo'
-        } 
+            'error': GENERIC_ERROR_MESSAGE
+        }
 
     return response

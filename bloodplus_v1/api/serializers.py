@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 User = get_user_model()
 
+
 class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -17,8 +18,8 @@ class SignUpSerializer(serializers.ModelSerializer):
         }
 
 
-#class UserSerializer(serializers.ModelSerializer):
-#    phone = serializers.CharField(source='user_profile.phone')
-#    class Meta:
-#        model = User
-#        fields = ('first_name', 'last_name', 'username', 'email', 'phone')
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'email',
+                  'username', 'phone', 'gender', 'date_of_birth')

@@ -1,15 +1,14 @@
 from django.http import JsonResponse
+from django.http import HttpResponseNotFound, HttpResponseServerError
 
 
-def handleNotFoundError(request):
-    message = ('No se ha podido encontrar ese recurso')
+def handle_not_found_error(request):
+    message = 'No se ha podido encontrar este recurso. o_o?'
     response = JsonResponse(data={'error': message})
-    response.status_code = 404
-    return response
+    return HttpResponseNotFound(response)
 
 
-def handleServerError(request):
-    message = ('Ha ocurrido un error interno en el servidor')
+def handle_server_error(request):
+    message = 'Ha ocurrido un error interno en el servidor. (>ლ)'
     response = JsonResponse(data={'error': message})
-    response.status_code = 500
-    return response
+    return HttpResponseServerError(response)
