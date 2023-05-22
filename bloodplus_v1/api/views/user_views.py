@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from django.contrib.auth.hashers import make_password
-from .serializers import SignUpSerializer, UserSerializer
+from ..serializers import SignUpSerializer, UserSerializer
 
 from rest_framework.permissions import IsAuthenticated
 
@@ -42,4 +42,3 @@ def register(request):
 def currentUser(request):
     user = UserSerializer(request.user)
     return Response(user.data)
-
