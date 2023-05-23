@@ -1,6 +1,9 @@
+import json
+
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
+from datetime import timedelta
 
 
 class UserManager(BaseUserManager):
@@ -89,3 +92,36 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+
+
+class Plan(models.Model):
+    plan_name = models.CharField(help_text=(
+        _('Nombre del plan de suscripción')), max_length=30)
+    description = models.TextField(blank=True, null=True)
+    limit_requests = models.IntegerField(default=5)
+    cost = models.DecimalField(decimal_places=2, max_digits=10, default=0)
+    grace_period = models.PositiveIntegerField(default=0, help_text=(
+        _('Cuántos días depués de que finalice la suscripción')))
+    trial_period = models.PositiveIntegerField(default=0, help_text=(
+        _('Cuántos días le damos gratis antes de que la suscripción comienze')))
+    sequence = models.IntegerField(
+        default=0, help_text=(_('Ordenar por secuencia')))
+
+    class Meta:
+        ordering = ['sequence']
+        verbose_name_plrual = "plans"
+
+    def __str__(self):
+        return self.plan_name
+
+
+class Subscription(models.Model):
+    STATUS_TYPE = ((0, "Activa"), (1, "Pendiente"),
+                   (2, "Vencida"), (3, "Cancelada"), (4, "Suspendida"))
+    status = models.SmallIntegerField(choices=STATUS_TYPE)
+    plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    start_date = models.DateField()
+    expiration_date = models.DateTimeField(
+        auto_now_add=True, blank=True, null=True)
+    cancellation_date = models.DateTimeField()
