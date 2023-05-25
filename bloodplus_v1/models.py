@@ -1,8 +1,14 @@
 import json
+from typing import Iterable, Optional
+import geocoder
+import os
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.gis.db import models as gismodels
+from django.contrib.gis.geos import Point
 from django.utils.translation import gettext_lazy as _
+
 from datetime import timedelta
 
 
@@ -52,6 +58,32 @@ class BloodType(models.Model):
         return self.blood_type
 
 
+class Location(models.Model):
+    address = models.TextField(null=True)
+    zip_code = models.CharField(max_length=7, blank=True, null=True)
+    country = models.CharField(max_length=50, blank=True, null=True)
+    state = models.CharField(max_length=50, blank=True, null=True)
+    point = gismodels.PointField(default=Point(0.0, 0.0))
+    date_updated = models.DateTimeField(auto_now=True, blank=True, null=True)
+
+    class Meta:
+        db_table = 'locations'
+
+    def save(self, *args, **kwargs):
+        try:
+            g = geocoder.mapquest(self.address, key=os.environ.get('GEOCODER_API_KEY'))
+            lng = g.lng
+            lat = g.lat
+            print(g)
+        except Exception as e:
+            lng = 0.0
+            lat = 0.0
+            print(f"Geocoding error: {str(e)}")        
+
+        self.point = Point(lng, lat)
+        super(Location, self).save(*args, **kwargs)   
+
+
 class User(AbstractBaseUser, PermissionsMixin):
     class Role(models.TextChoices):
         ADMIN = "ADMIN", "Admin"
@@ -69,6 +101,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=50, choices=Role.choices, default=Role.ADMIN)
     blood = models.ForeignKey(
         BloodType, on_delete=models.SET_NULL, blank=True, null=True)
+    location = models.OneToOneField(Location, on_delete=models.RESTRICT, null=True)
     date_of_birth = models.DateField(default='2023-02-02')
     average_rating = models.DecimalField(
         max_digits=2, decimal_places=1, default=0)
@@ -78,6 +111,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_subscribed = models.BooleanField(default=False)
+
+    # Modeling Boolean Status: Private Data
+    show_email = models.BooleanField(default=True)
+    show_phone = models.BooleanField(default=True)
+    show_first_name = models.BooleanField(default=True)
+    show_last_name = models.BooleanField(default=True)    
+
     date_joined = models.DateTimeField(
         auto_now_add=True, blank=True, null=True)
     date_updated = models.DateTimeField(auto_now=True, blank=True, null=True)
@@ -92,9 +132,40 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+    
+
+class IssueType(models.Model):
+    issue = models.CharField(max_length=100)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True, null=True, blank=True)
+
+    class Meta:
+        db_table = 'issue_type'        
+
+    def __str__(self):
+        return self.issue
 
 
-class Plan(models.Model):
+class SupportClient(models.Model):
+    class Status(models.TextChoices):
+        ABIERTO = "ABIERTO", "Abierto"
+        EN_PROGRESO = "EN_PROGRESO", "En Progreso"
+        RESUELTO = "RESUELTO", "Resuelto"
+        CERRADO = "CERRADO", "Cerrado"
+
+    subject = models.CharField(max_length=255)
+    description = models.TextField()
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.ABIERTO)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    issue_type = models.ForeignKey(IssueType, on_delete=models.CASCADE)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated= models.DateTimeField(auto_now=True, null=True, blank=True)
+    date_deleted = models.DateTimeField(auto_now=True, null=True, blank=True)
+
+    class Meta:
+        db_table = 'support_client'
+
+""" class Plan(models.Model):
     plan_name = models.CharField(help_text=(
         _('Nombre del plan de suscripción')), max_length=30)
     description = models.TextField(blank=True, null=True)
@@ -125,3 +196,4 @@ class Subscription(models.Model):
     expiration_date = models.DateTimeField(
         auto_now_add=True, blank=True, null=True)
     cancellation_date = models.DateTimeField()
+ """

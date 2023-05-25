@@ -11,7 +11,7 @@ __DJANGO_APPS = (
 )
 
 __MY_APPS = (
-    'bloodplus_v1',
+    'bloodplus_v1.apps.BloodplusV1Config',
 )
 
 __THIRD_PARTY_APPS = (

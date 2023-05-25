@@ -9,7 +9,6 @@ from rest_framework.permissions import IsAuthenticated
 
 from bloodplus_v1.models import User
 
-
 @api_view(['POST'])
 def register(request):
     data = request.data
