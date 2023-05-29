@@ -105,6 +105,21 @@ cp .env.example .env
 
 Puedes usar tu nuevo archivo .env para almacenar claves API, APP_KEY, app_passwords y tendrás acceso a ellas en la aplicación Django. Abrirás ese archivo y generarás una nueva APP_KEY en la [siguiente página](https://djecrety.ir/) y la pondrás ahi `APP_KEY=<clave-generada>` y luego procederás a poner las credenciales que faltan en la configuración de la base de datos.
 
+4. **Extensiones necesarias**: Dado que estamos trabajando con datos geoespaciales, y estamos utilizando PostgreSQL, e instalado una extensión llamada GDAL para trabajar con esto. Si tratan de ejecutar el proyecto con el paso que sigue, les marcará un error como esto.
+
+```bash
+FileNotFoundError: Could not find module '(ruta)\bloodplus-backend-api\venv\Lib\site-packages\osgeo\gdal304.dll'
+(or one of its dependencies). Try using the full path with constructor syntax.
+```
+
+Lo que vamos a hacer es instalar el GDAL de la la [siguiente página](https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal) y escogerán el que es apto para su sistema operativo y lo descargan. Una vez lo tengan descargado, el instalador lo meterán al proyecto del backend en el directorio raíz, y ejecutarán el siguiente comando (por ejemplo en el caso de Windows x64):
+
+```bash
+pip install GDAL-3.4.3-cp311-cp311-win_amd64.whl
+```
+
+Una vez instalado, podemos eliminar el instalador que agregamos anteriormente al proyecto raíz. Y procedemos con el siguiente paso.
+
 5. **Servidor local** - Django tiene un servidor de desarrollo integrado que es un servidor web ligero escrito puramente en Python. El servidor de desarrollo de Django nos permite desarrollar cosas rápidamente, sin tener que lidiar con la configuración de un servidor de producción - como Apache - hasta que estés listo para la producción. Utiliza el siguiente comando para iniciar un servidor de desarrollo local.
 
 ```bash
