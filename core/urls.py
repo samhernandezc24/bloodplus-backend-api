@@ -1,13 +1,19 @@
 from django.contrib import admin
 from django.urls import include, path
 
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
+from bloodplus_v1.api.views.user_views import MyTokenObtainPairView, getRoutes
+
+from rest_framework_simplejwt.views import (
+    TokenRefreshView,
+)
 
 urlpatterns = [
+    path('', getRoutes),
     path('api/v1/usuarios/', include('bloodplus_v1.api.urls')),
-    path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+
+    path('api/v1/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/v1/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+
     path('admin/', admin.site.urls),
 ]
 
