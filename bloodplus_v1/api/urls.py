@@ -7,6 +7,8 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 
+app_name = 'bloodplus_v1'
+
 urlpatterns = [
     path('', views.getRoutes, name='get_routes'),
     path('usuarios/', views.user_list_view, name='user_list'),

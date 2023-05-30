@@ -38,7 +38,7 @@ def getRoutes(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+#@permission_classes([IsAuthenticated])
 def user_list_view(request):
     role = request.query_params.get('role', None)
     if role and role in ['DONADOR', 'SOLICITADOR']:

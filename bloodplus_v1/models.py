@@ -1,5 +1,3 @@
-import json
-from typing import Iterable, Optional
 import geocoder
 import os
 
@@ -8,8 +6,6 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.contrib.gis.db import models as gismodels
 from django.contrib.gis.geos import Point
 from django.utils.translation import gettext_lazy as _
-
-from datetime import timedelta
 
 
 class UserManager(BaseUserManager):
