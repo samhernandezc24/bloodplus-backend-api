@@ -36,11 +36,12 @@ DEBUG = os.environ.get('APP_DEBUG', False)
 
 ALLOWED_HOSTS = []
 
-CORS_ALLOWED_ORIGINS = [
+"""CORS_ALLOWED_ORIGINS = [
     # "https://bloodplusapi.co",
     "http://localhost:3000",
     "http://172.23.96.1:3000",
-]
+]"""
+CORS_ALLOW_ALL_ORIGINS = True
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
@@ -124,7 +125,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',        
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': os.environ.get('DB_DATABASE', 'bloodplus_db'),
         'USER': os.environ.get('DB_USERNAME', 'root'),
         'PASSWORD': os.environ.get('DB_PASSWORD', ''),

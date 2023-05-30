@@ -48,11 +48,11 @@ class UserAdmin(BaseUserAdmin):
     add_form = UserCreationForm
 
     list_display = [
-        'email', 'username', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined']
+        'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined']
     list_filter = ['is_active', 'is_staff',
                    'gender', 'is_subscribed', 'blood', 'role']
     fieldsets = [
-        (None, {"fields": ["email", "username",
+        (None, {"fields": ["email",
          "first_name", "last_name", "password"]}),
         ("Información Personal", {"fields": [
          "date_of_birth", "gender", "phone", "blood"]}),
@@ -67,7 +67,7 @@ class UserAdmin(BaseUserAdmin):
             {
                 "classes": ["wide"],
                 "fields": [
-                    "email", "username", "first_name", "last_name",
+                    "email", "first_name", "last_name",
                     "password1", "password2", "date_of_birth", "phone", "gender",
                     "blood"],
             },

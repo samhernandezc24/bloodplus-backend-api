@@ -14,13 +14,14 @@ def custom_exception_handler(exc, context):
 
     GENERIC_ERROR_MESSAGE = 'Ocurrió un error inesperado. Por favor, inténtalo más tarde.'
 
-    if exception_class in ERROR_MESSAGES:
-        response.data = {
-            'error': ERROR_MESSAGES[exception_class].strip()
-        }
-    else:
-        response.data = {
-            'error': GENERIC_ERROR_MESSAGE
-        }
+    if response is not None:
+        if exception_class in ERROR_MESSAGES:
+            response.data = {
+                'error': ERROR_MESSAGES[exception_class].strip()
+            }
+        else:
+            response.data = {
+                'error': GENERIC_ERROR_MESSAGE
+            }
 
     return response

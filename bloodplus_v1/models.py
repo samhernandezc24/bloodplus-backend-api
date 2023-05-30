@@ -71,17 +71,18 @@ class Location(models.Model):
 
     def save(self, *args, **kwargs):
         try:
-            g = geocoder.mapquest(self.address, key=os.environ.get('GEOCODER_API_KEY'))
+            g = geocoder.mapquest(
+                self.address, key=os.environ.get('GEOCODER_API_KEY'))
             lng = g.lng
             lat = g.lat
             print(g)
         except Exception as e:
             lng = 0.0
             lat = 0.0
-            print(f"Geocoding error: {str(e)}")        
+            print(f"Geocoding error: {str(e)}")
 
         self.point = Point(lng, lat)
-        super(Location, self).save(*args, **kwargs)   
+        super(Location, self).save(*args, **kwargs)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -101,7 +102,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=50, choices=Role.choices, default=Role.ADMIN)
     blood = models.ForeignKey(
         BloodType, on_delete=models.SET_NULL, blank=True, null=True)
-    location = models.OneToOneField(Location, on_delete=models.RESTRICT, null=True)
+    location = models.OneToOneField(
+        Location, on_delete=models.RESTRICT, null=True)
     date_of_birth = models.DateField(default='2023-02-02')
     average_rating = models.DecimalField(
         max_digits=2, decimal_places=1, default=0)
@@ -116,7 +118,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     show_email = models.BooleanField(default=True)
     show_phone = models.BooleanField(default=True)
     show_first_name = models.BooleanField(default=True)
-    show_last_name = models.BooleanField(default=True)    
+    show_last_name = models.BooleanField(default=True)
 
     date_joined = models.DateTimeField(
         auto_now_add=True, blank=True, null=True)
@@ -132,7 +134,14 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
-    
+
+    def get_gender_display(self):
+        gender_display = dict(self.GENDER_TYPES).get(self.gender)
+        return gender_display if gender_display else self.gender
+
+    def get_role_display(self):
+        return dict(self.Role.choices).get(self.role)
+
 
 class IssueType(models.Model):
     issue = models.CharField(max_length=100)
@@ -140,7 +149,7 @@ class IssueType(models.Model):
     date_updated = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     class Meta:
-        db_table = 'issue_type'        
+        db_table = 'issue_type'
 
     def __str__(self):
         return self.issue
@@ -155,15 +164,17 @@ class SupportClient(models.Model):
 
     subject = models.CharField(max_length=255)
     description = models.TextField()
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.ABIERTO)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.ABIERTO)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     issue_type = models.ForeignKey(IssueType, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
-    date_updated= models.DateTimeField(auto_now=True, null=True, blank=True)
+    date_updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     date_deleted = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     class Meta:
         db_table = 'support_client'
+
 
 """ class Plan(models.Model):
     plan_name = models.CharField(help_text=(
