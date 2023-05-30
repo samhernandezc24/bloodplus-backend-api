@@ -1,19 +1,28 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import EmailValidator
 from rest_framework import serializers
 from bloodplus_v1.models import Location, BloodType
 
 User = get_user_model()
 
 
+class BloodTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BloodType
+        fields = ('blood_type', 'description')
+
+
 class AdminSignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'password']
+        fields = ['email', 'password', 'first_name',
+                  'last_name', 'date_of_birth']
         extra_kwargs = {
+            'email': {'validators': [EmailValidator()]},
+            'password': {'required': True, 'allow_blank': False, 'min_length': 8},
             'first_name': {'required': True, 'allow_blank': False},
             'last_name': {'required': True, 'allow_blank': False},
-            'email': {'required': True, 'allow_blank': False},
-            'password': {'required': True, 'allow_blank': False, 'min_length': 8},
+            'date_of_birth': {'required': True}
         }
 
 
@@ -22,16 +31,16 @@ class UserSignUpSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'first_name', 'last_name', 'email', 'password', 'phone', 'gender', 'blood',
-            'location', 'date_of_birth',
+            'location', 'date_of_birth'
         ]
         extra_kwargs = {
-            'first_name': {'required': True, 'allow_blank': False},
-            'last_name': {'required': True, 'allow_blank': False},
-            'email': {'required': True, 'allow_blank': False},
-            'password': {'required': True, 'allow_blank': False, 'min_length': 8},
-            'phone': {'required': False, 'allow_blank': True},
+            'email': {'validators': [EmailValidator()]},
+            'password': {'required': True, 'min_length': 8},
+            'first_name': {'required': True},
+            'last_name': {'required': True},
+            'phone': {'required': False},
             'gender': {'required': True},
-            'blood': {'required': True},
+            'blood': {'required': False},
             'location': {'required': False},
             'date_of_birth': {'required': True},
         }
@@ -40,35 +49,36 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 class SignUpSerializer(serializers.ModelSerializer):
     role = serializers.CharField()
 
-    def validate_role(self, value):
-        valid_roles = ['ADMIN', 'DONADOR', 'SOLICITADOR']
+    class Meta:
+        model = User
+        fields = [
+            'first_name', 'last_name', 'email', 'password', 'phone', 'gender', 'blood',
+            'location', 'date_of_birth', 'role'
+        ]
 
-        if value not in valid_roles:
-            raise serializers.ValidationError('Tipo de rol inválido.')
-        return value
-
-    def to_internal_value(self, data):
-        role = data.get('role')
-
-        if role == 'ADMIN':
-            role_serializer = AdminSignUpSerializer(data=data)
+    def to_representation(self, instance):
+        if instance.role == User.Role.ADMIN:
+            serializer = AdminSignUpSerializer(instance)
         else:
-            role_serializer = UserSignUpSerializer(data=data)
+            serializer = UserSignUpSerializer(instance)
+        return serializer.data
 
-        role_serializer.is_valid(raise_exception=True)
-        return role_serializer.validated_data
+    def create(self, validated_data):
+        role = validated_data.pop('role')
+
+        if role == User.Role.ADMIN:
+            serializer = AdminSignUpSerializer(data=validated_data)
+        else:
+            serializer = UserSignUpSerializer(data=validated_data)
+
+        serializer.is_valid(raise_exception=True)
+        return serializer.save()
 
 
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
         fields = ('address', 'zip_code', 'country', 'state')
-
-
-class BloodTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BloodType
-        fields = ('blood_type', 'description')
 
 
 class UserSerializer(serializers.ModelSerializer):

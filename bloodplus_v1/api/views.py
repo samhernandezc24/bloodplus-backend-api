@@ -27,6 +27,8 @@ class MyTokenObtainPairView(TokenObtainPairView):
 @api_view(['GET'])
 def getRoutes(request):
     routes = [
+        '/api/v1/usuarios/',
+        '/api/v1/usuarios/crear/',
         '/api/v1/token',
         '/api/v1/token/refresh',
         '/api/v1/token/verify',
@@ -35,28 +37,54 @@ def getRoutes(request):
     return Response(routes)
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_list_view(request):
+    role = request.query_params.get('role', None)
+    if role and role in ['DONADOR', 'SOLICITADOR']:
+        users = User.objects.filter(role=role)
+    else:
+        users = User.objects.filter(role__in=['DONADOR', 'SOLICITADOR'])
+
+    serializer = UserSerializer(users, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 @api_view(['POST'])
-def UserRegistrationView(request):
+def user_create_view(request):
     data = request.data
-    user_serializer = SignUpSerializer(data=data)
+    serializer = SignUpSerializer(data=data)
 
-    if user_serializer.is_valid():
+    if serializer.is_valid():
         if not User.objects.filter(username=data['email']).exists():
+            role = data.get('role', User.Role.ADMIN)
+            blood_type = None
 
-            try:
-                blood_type = BloodType.objects.get(
-                    blood_type=data['blood_type'])
-            except BloodType.DoesNotExist:
-                return Response({'error': 'El tipo de sangre proporcionado no existe'}, status=status.HTTP_400_BAD_REQUEST)
+            if role != User.Role.ADMIN:
+                try:
+                    blood_type = BloodType.objects.get(id=data['blood'])
+                except BloodType.DoesNotExist:
+                    return Response({'error': 'El tipo de sangre proporcionado no existe'}, status=status.HTTP_400_BAD_REQUEST)
 
-            User.objects.create(
-                first_name=data['first_name'],
-                last_name=data['last_name'],
-                username=data['email'],
-                email=data['email'],
-                password=make_password(data['password']),
-                blood=blood_type,
-            )
+            user_data = {
+                'first_name': data['first_name'],
+                'last_name': data['last_name'],
+                'username': data['email'],
+                'email': data['email'],
+                'password': make_password(data['password']),
+                'role': role,
+                'date_of_birth': data['date_of_birth'],
+            }
+
+            if blood_type:
+                user_data.update({
+                    'gender': data['gender'],
+                    'blood': blood_type,
+                    'phone': data['phone'],
+                })
+
+            User.objects.create(**user_data)
+
             return Response({
                 'message': 'Tu registro ha sido exitoso. ¡Bienvenido(a) a BloodPlus!'},
                 status=status.HTTP_201_CREATED
@@ -67,7 +95,7 @@ def UserRegistrationView(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
     else:
-        return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -75,11 +103,3 @@ def UserRegistrationView(request):
 def CurrentUserView(request):
     user_serializer = UserSerializer(request.user)
     return Response(user_serializer.data)
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def UserListView(request):
-    users = User.objects.filter(role__in=['DONADOR', 'SOLICITADOR'])
-    serializer = UserSerializer(users, many=True)
-    return Response(serializer.data)

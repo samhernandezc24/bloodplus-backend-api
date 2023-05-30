@@ -104,7 +104,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         BloodType, on_delete=models.SET_NULL, blank=True, null=True)
     location = models.OneToOneField(
         Location, on_delete=models.RESTRICT, null=True)
-    date_of_birth = models.DateField(default='2023-02-02')
+    date_of_birth = models.DateField()
     average_rating = models.DecimalField(
         max_digits=2, decimal_places=1, default=0)
     total_donations = models.PositiveIntegerField(default=0)
