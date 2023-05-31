@@ -38,7 +38,7 @@ def getRoutes(request):
 
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def user_list_view(request):
     role = request.query_params.get('role', None)
     if role and role in ['DONADOR', 'SOLICITADOR']:
@@ -48,6 +48,16 @@ def user_list_view(request):
 
     serializer = UserSerializer(users, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def user_detail_view(request, pk):
+    try:
+        user = User.objects.exclude(role='ADMIN').get(pk=pk)
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        return Response({'error': 'El usuario no existe.'}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['POST'])

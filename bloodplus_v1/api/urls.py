@@ -12,6 +12,7 @@ app_name = 'bloodplus_v1'
 urlpatterns = [
     path('', views.getRoutes, name='get_routes'),
     path('usuarios/', views.user_list_view, name='user_list'),
+    path('usuarios/<int:pk>', views.user_detail_view, name='user_detail'),
     path('usuarios/crear/', views.user_create_view, name='user_create'),
     path('usuarios/me/', views.CurrentUserView, name='current_user'),
 
